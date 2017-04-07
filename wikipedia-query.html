@@ -1,5 +1,5 @@
 <link rel="import" href="../polymer/polymer.html">
-
+<link rel="import" href="../iron-ajax/iron-ajax.html">
 <!--
 `wikipedia-query`
 A LRN element
@@ -14,21 +14,38 @@ A LRN element
         display: block;
       }
     </style>
-    <h2>Hello [[prop1]]</h2>
+    <h2>Results for {{search}}</h2>
+    <div>
+    <pre id="{{search}}">{{search-result}}</pre>
+    </div>
+    <iron-ajax
+       auto
+       url$="https://en.wikipedia.org/w/api.php?origin=*&action=query&titles={{search}}&prop=extracts&format=json"
+       handle-as="json"
+       on-response="handleResponse"
+       last-response="{{search-result}}"></iron-ajax>
   </template>
-
   <script>
     Polymer({
 
       is: 'wikipedia-query',
 
       properties: {
-        prop1: {
+        search: {
           type: String,
-          value: 'wikipedia-query',
+          value: 'Polymer (library)',
+          notify: true,
         },
+        searchResult: {
+          type: Object,
+          notify: true,
+        }
       },
-
+      handleResponse: function(response) {
+        console.dir(this.searchResult);
+        //console.log(this.searchResults.query.pages.47583124);
+        //this.$$('#pretag').innerHTML = this.searchResults.extract;
+      }
     });
   </script>
 </dom-module>
