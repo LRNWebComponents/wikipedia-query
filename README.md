@@ -1,4 +1,4 @@
-# \<boiler-plate\>
+# \<wikipedia-query\>
 
 A LRN element
 
