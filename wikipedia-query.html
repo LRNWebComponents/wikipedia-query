@@ -4,7 +4,7 @@
 `wikipedia-query`
 A LRN element
 
-@demo demo/index.html 
+@demo demo/index.html
 -->
 
 <dom-module id="wikipedia-query">
@@ -16,14 +16,14 @@ A LRN element
     </style>
     <h2>Results for {{search}}</h2>
     <div>
-    <pre id="{{search}}">{{search-result}}</pre>
+    <pre id="{{search}}">{{searchResult}}</pre>
     </div>
     <iron-ajax
        auto
        url$="https://en.wikipedia.org/w/api.php?origin=*&action=query&titles={{search}}&prop=extracts&format=json"
        handle-as="json"
        on-response="handleResponse"
-       last-response="{{search-result}}"></iron-ajax>
+       last-response="{{searchResult}}"></iron-ajax>
   </template>
   <script>
     Polymer({
@@ -34,6 +34,7 @@ A LRN element
         search: {
           type: String,
           value: 'Polymer (library)',
+          reflectToAttribute: true,
           notify: true,
         },
         searchResult: {
