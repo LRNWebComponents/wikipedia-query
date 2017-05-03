@@ -16,14 +16,14 @@ A LRN element
     </style>
     <h2>Results for {{search}}</h2>
     <div>
-    <pre id="{{search}}">{{searchResult}}</pre>
+    <div id="result"></div>
     </div>
     <iron-ajax
        auto
        url$="https://en.wikipedia.org/w/api.php?origin=*&action=query&titles={{search}}&prop=extracts&format=json"
        handle-as="json"
        on-response="handleResponse"
-       last-response="{{searchResult}}"></iron-ajax>
+       last-response="{{searchResponse}}"></iron-ajax>
   </template>
   <script>
     Polymer({
@@ -37,15 +37,30 @@ A LRN element
           reflectToAttribute: true,
           notify: true,
         },
-        searchResult: {
+        searchResponse: {
           type: Object,
+          notify: true,
+        },
+        resultText: {
+          type: String,
           notify: true,
         }
       },
+      /**
+       * Process response from wikipedia.
+       */
       handleResponse: function(response) {
-        console.dir(this.searchResult);
-        //console.log(this.searchResults.query.pages.47583124);
-        //this.$$('#pretag').innerHTML = this.searchResults.extract;
+        // the key of pages is a number so need to look for it
+        for (var key in this.searchResponse.query.pages) {
+          // skip anything that's prototype object
+          if (!this.searchResponse.query.pages.hasOwnProperty(key)) continue;
+          // load object response
+          var obj = this.searchResponse.query.pages[key];
+          // need to innerHTML this or it won't set
+          this.$$('#result').innerHTML = obj.extract;
+          // set it to resultText property as well so other things could use it
+          this.resultText = obj.extract;
+        }
       }
     });
   </script>
