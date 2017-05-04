@@ -1,6 +1,6 @@
 # \<wikipedia-query\>
 
-A LRN element
+A LRN element to query wikipedia and display the results
 
 ## Install the Polymer-CLI
 
