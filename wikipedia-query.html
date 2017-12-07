@@ -1,5 +1,6 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../iron-ajax/iron-ajax.html">
+<link rel="import" href="../hax-body-behaviors/hax-body-behaviors.html">
 <!--
 `wikipedia-query`
 A LRN element
@@ -29,22 +30,45 @@ A LRN element
     Polymer({
 
       is: 'wikipedia-query',
-
+      behaviors: [HAXBehaviors.PropertiesBehaviors],
       properties: {
+        /**
+         * Search string.
+         */
         search: {
           type: String,
           value: 'Polymer (library)',
           reflectToAttribute: true,
-          notify: true,
         },
+        /**
+         * Response to parse.
+         */
         searchResponse: {
           type: Object,
-          notify: true,
         },
-        resultText: {
-          type: String,
-          notify: true,
-        }
+      },
+      /**
+       * Ready
+       */
+      ready: function() {
+        // Establish hax properties if they exist
+        let props = {
+          'canScale': true,
+          'canPosition': true,
+          'settings': {
+            'bar':[
+              {
+                'property': 'search',
+                'title': 'Search term',
+                'description': 'Word to search wikipedia for.',
+                'inputMethod': 'textfield',
+                'icon': 'title',
+                'required': true,
+              }
+            ]
+          }
+        };
+        this.setHaxProperties(props);
       },
       /**
        * Process response from wikipedia.
@@ -57,9 +81,7 @@ A LRN element
           // load object response
           var obj = this.searchResponse.query.pages[key];
           // need to innerHTML this or it won't set
-          this.$$('#result').innerHTML = obj.extract;
-          // set it to resultText property as well so other things could use it
-          this.resultText = obj.extract;
+          this.$.result.innerHTML = obj.extract;
         }
       }
     });
