@@ -1,6 +1,7 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../iron-ajax/iron-ajax.html">
 <link rel="import" href="../hax-body-behaviors/hax-body-behaviors.html">
+<link rel="import" href="../schema-behaviors/schema-behaviors.html">
 <!--
 `wikipedia-query`
 A LRN element
@@ -15,23 +16,33 @@ A LRN element
         display: block;
       }
     </style>
-    <h2>Results for {{search}}</h2>
-    <div>
-    <div id="result"></div>
-    </div>
     <iron-ajax
-       auto
-       url$="https://en.wikipedia.org/w/api.php?origin=*&action=query&titles={{search}}&prop=extracts&format=json"
-       handle-as="json"
-       on-response="handleResponse"
-       last-response="{{searchResponse}}"></iron-ajax>
+      auto
+      url$="https://en.wikipedia.org/w/api.php?origin=*&action=query&titles={{search}}&prop=extracts&format=json"
+      handle-as="json"
+      on-response="handleResponse"
+      last-response="{{searchResponse}}"></iron-ajax>
+    <h2 hidden$="[[!showTitle]]">Results for {{search}}</h2>
+    <template is="dom-if" if="[[__rendercontent]]">
+      <div>
+        <div id="result"></div>
+      </div>
+    </template>
   </template>
   <script>
     Polymer({
 
       is: 'wikipedia-query',
-      behaviors: [HAXBehaviors.PropertiesBehaviors],
+      behaviors: [HAXBehaviors.PropertiesBehaviors, SchemaBehaviors.Schema],
       properties: {
+        /**
+         * ShowTitle
+         */
+        showTitle: {
+          type: Boolean,
+          value: true,
+          reflectToAttribute: true,
+        },
         /**
          * Search string.
          */
@@ -39,6 +50,15 @@ A LRN element
           type: String,
           value: 'Polymer (library)',
           reflectToAttribute: true,
+        },
+        /**
+         * Render the response as..
+         */
+        renderAs: {
+          type: String,
+          value: 'content',
+          reflectToAttribute: true,
+          observer: '_renderAsUpdated',
         },
         /**
          * Response to parse.
@@ -55,8 +75,25 @@ A LRN element
         let props = {
           'canScale': true,
           'canPosition': true,
+          'canEditSource': false,
+          'gizmo': {
+            'title': 'Wikipedia article',
+            'description': 'This can display a wikipedia article in context in a variety of formats.',
+            'icon': 'icons:book',
+            'color': 'green',
+            'groups': ['Content', 'Creative Commons'],
+            'handles': [
+              {
+                'type': 'content',
+                'title': 'search'
+              },
+            ],
+            'meta': {
+              'author': 'LRNWebComponents'
+            }
+          },
           'settings': {
-            'bar':[
+            'quick':[
               {
                 'property': 'search',
                 'title': 'Search term',
@@ -64,11 +101,43 @@ A LRN element
                 'inputMethod': 'textfield',
                 'icon': 'title',
                 'required': true,
+              },
+              {
+                'property': 'showTitle',
+                'title': 'Show title',
+                'description': 'Whether or not to render the title of the article.',
+                'inputMethod': 'boolean',
+                'icon': 'title',
               }
             ]
           }
         };
         this.setHaxProperties(props);
+      },
+      /**
+       * Convert renderas into a variable.
+       */
+      _renderAsUpdated: function(newValue, oldValue) {
+        if (typeof newValue !== typeof undefined) {
+          this._resetRenderMethods();
+          this['__render' + newValue] = true;
+        }
+      },
+      /**
+       * Validate input method.
+       */
+      _validRenderMethods: function() {
+        var methods = ['content'];
+        return methods;
+      },
+      /**
+       * Reset all our meta attributes.
+       */
+      _resetRenderMethods: function() {
+        let methods = this._validRenderMethods();
+        for (var i=0; i<methods.length; i++) {
+          this['__render' + methods[i]] = false;
+        }
       },
       /**
        * Process response from wikipedia.
@@ -81,7 +150,7 @@ A LRN element
           // load object response
           var obj = this.searchResponse.query.pages[key];
           // need to innerHTML this or it won't set
-          this.$.result.innerHTML = obj.extract;
+          this.$$('#result').innerHTML = obj.extract;
         }
       }
     });
