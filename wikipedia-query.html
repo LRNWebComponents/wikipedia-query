@@ -14,20 +14,24 @@ A LRN element
     <style>
       :host {
         display: block;
+        --wikipedia-query-body-height: 10em;
+      }
+      #result {
+        height: var(--wikipedia-query-body-height);
+        overflow: scroll;
+        border: 1px grey solid;
+        padding: .5em 1em;
       }
     </style>
     <iron-ajax
+      hidden
       auto
       url$="https://en.wikipedia.org/w/api.php?origin=*&action=query&titles={{search}}&prop=extracts&format=json"
       handle-as="json"
       on-response="handleResponse"
       last-response="{{searchResponse}}"></iron-ajax>
-    <h2 hidden$="[[!showTitle]]">Results for {{search}}</h2>
-    <template is="dom-if" if="[[__rendercontent]]">
-      <div>
-        <div id="result"></div>
-      </div>
-    </template>
+    <h3 hidden$="[[!showTitle]]">{{search}} Wikipedia article</h3>
+    <div id="result" hidden$="[[!__rendercontent]]"></div>
   </template>
   <script>
     Polymer({
@@ -109,6 +113,16 @@ A LRN element
                 'inputMethod': 'boolean',
                 'icon': 'editor:title',
               }
+            ],
+            'configure':[
+              {
+                'property': 'search',
+                'title': 'Search term',
+                'description': 'Word to search wikipedia for.',
+                'inputMethod': 'textfield',
+                'icon': 'editor:title',
+                'required': true,
+              }
             ]
           }
         };
@@ -150,7 +164,7 @@ A LRN element
           // load object response
           var obj = this.searchResponse.query.pages[key];
           // need to innerHTML this or it won't set
-          this.$$('#result').innerHTML = obj.extract;
+          this.$.result.innerHTML = obj.extract;
         }
       }
     });
